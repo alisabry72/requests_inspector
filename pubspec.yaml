@@ -35,25 +35,9 @@ dependencies:
 
 
 dev_dependencies:
-  flutter_lints: ^3.0.1
+ 
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^5.0.0
-
-flutter:
-  plugin:
-    platforms:
-      android:
-        default_package: requests_inspector
-      ios:
-        default_package: requests_inspector
-      macos:
-        default_package: requests_inspector
-      windows:
-        default_package: requests_inspector
-      linux:
-        default_package: requests_inspector
-      web:
-        default_package: requests_inspector
 
