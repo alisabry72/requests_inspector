@@ -93,10 +93,10 @@ packages:
     dependency: "direct main"
     description:
       name: dio
-      sha256: "5598aa796bbf4699afd5c67c0f5f6e2ed542afc956884b9cd58c306966efc260"
+      sha256: "253a18bbd4851fecba42f7343a1df3a9a4c1d31a2c1b37e221086b4fa8c8dbc9"
       url: "https://pub.dev"
     source: hosted
-    version: "5.7.0"
+    version: "5.8.0+1"
   dio_web_adapter:
     dependency: transitive
     description:
@@ -154,10 +154,10 @@ packages:
     dependency: "direct dev"
     description:
       name: flutter_lints
-      sha256: "9e8c3858111da373efc5aa341de011d9bd23e2c5c5e0c62bccf32438e192d7b1"
+      sha256: "5398f14efa795ffb7a33e9b6a08798b26a180edac4ad7db3f231e40f82ce11e1"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.2"
+    version: "5.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -292,10 +292,10 @@ packages:
     dependency: transitive
     description:
       name: lints
-      sha256: cbf8d4b858bb0134ef3ef87841abdf8d63bfc255c266b7bf6b39daa1085c4290
+      sha256: "3315600f3fb3b135be672bf4a178c55f274bebe368325ae18462c89ac1e3b413"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0"
+    version: "5.0.0"
   logging:
     dependency: transitive
     description:
@@ -476,10 +476,10 @@ packages:
     dependency: "direct main"
     description:
       name: share_plus
-      sha256: "6327c3f233729374d0abaafd61f6846115b2a481b4feddd8534211dc10659400"
+      sha256: fce43200aa03ea87b91ce4c3ac79f0cecd52e2a7a56c7a4185023c271fbfa6da
       url: "https://pub.dev"
     source: hosted
-    version: "10.1.3"
+    version: "10.1.4"
   share_plus_platform_interface:
     dependency: transitive
     description:
