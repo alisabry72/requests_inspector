@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:hasura_connect/hasura_connect.dart';
 import 'package:requests_inspector/requests_inspector.dart';
 import 'package:graphql/client.dart';
 
@@ -46,24 +45,6 @@ Future<List<Post>> fetchPostsUsingInterceptor() async {
   final posts = postsMap.map((postMap) => Post.fromMap(postMap)).toList();
 
   return posts;
-}
-
-Future<List<Post>> fetchPostsGraphQlUsingHasuraInterceptor() async {
-  final response = await HasuraConnect(
-    'https://graphqlzero.almansi.me/api',
-    interceptors: [HasuraInspectorInterceptor()],
-  ).query('''query {
-    post(id: 1) {
-      id
-      title
-      body
-    }
-    }''');
-  log(response);
-  var post = Post.fromMap(response['data']['post']);
-  log(post.toMap().toString());
-
-  return [post];
 }
 
 Future<List<Post>> fetchPostsGraphQlUsingGraphQLFlutterInterceptor() async {
@@ -160,11 +141,13 @@ class Post {
   }
 }
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 void main() => runApp(
-      const RequestsInspector(
-        enabled: true,
-        showInspectorOn: ShowInspectorOn.Both,
-        child: MyApp(),
+      RequestsInspector(
+        // Add your `navigatorKey` to enable `Stopper` feature
+        navigatorKey: navigatorKey,
+        child: const MyApp(),
       ),
     );
 
@@ -176,50 +159,68 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late Future<List<Post>> futurePosts;
+  List<Post> posts = [];
+  bool isLoading = true;
 
   @override
   void initState() {
+    fetchPostsUsingInterceptor().then(
+      (value) => setState(() {
+        posts = value;
+        isLoading = false;
+      }),
+    );
+    /*for restful apis Interceptor example use => fetchPostsUsingInterceptor() */;
+    // fetchPostsGraphQlUsingGraphQLFlutterInterceptor() /*for graph ql Interceptor example */;
     super.initState();
-    futurePosts =
-        fetchPostsUsingInterceptor() /*for restful apis Interceptor example use => fetchPostsUsingInterceptor() */;
-    //  fetchPostsGraphQlUsingHasuraInterceptor() /*for graph ql(Hasura) Interceptor example */;
-    //  fetchPostsGraphQlUsingGraphQLFlutterInterceptor() /*for graph ql Interceptor example */;
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Fetch Data Example',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        useMaterial3: false,
       ),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Fetch Data Example'),
-          leading: const InkWell(
-            child: Padding(
+          leading: InkWell(
+            child: const Padding(
               padding: EdgeInsets.all(8.0),
               child: Icon(Icons.refresh),
             ),
-            onTap: fetchPosts,
+            onTap: () {
+              setState(() => isLoading = true);
+              fetchPostsUsingInterceptor().then(
+                (value) => setState(() {
+                  posts = value;
+                  isLoading = false;
+                }),
+              );
+            },
           ),
         ),
         body: Center(
-          child: FutureBuilder<List<Post>>(
-            future: futurePosts,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return PostsListWidget(postsList: snapshot.data!);
-              } else if (snapshot.hasError) {
-                return Text('${snapshot.error}');
-              }
+          child: () {
+            if (isLoading) return const CircularProgressIndicator();
 
-              // By default, show a loading spinner.
-              return const CircularProgressIndicator();
-            },
-          ),
+            if (posts.isNotEmpty) {
+              return PostsListWidget(
+                postsList: posts,
+                onRefresh: () => fetchPostsUsingInterceptor().then(
+                  (value) => setState(() => posts = value),
+                ),
+              );
+            }
+
+            return const Text('Empty list (error)');
+
+            // By default, show a loading spinner.
+          }(),
         ),
       ),
     );
@@ -227,13 +228,19 @@ class _MyAppState extends State<MyApp> {
 }
 
 class PostsListWidget extends StatelessWidget {
-  const PostsListWidget({Key? key, required this.postsList}) : super(key: key);
+  const PostsListWidget({
+    Key? key,
+    required this.postsList,
+    required this.onRefresh,
+  }) : super(key: key);
+
+  final RefreshCallback onRefresh;
 
   final List<Post> postsList;
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      onRefresh: fetchPosts,
+      onRefresh: onRefresh,
       child: ListView.builder(
         shrinkWrap: true,
         physics: const AlwaysScrollableScrollPhysics(),

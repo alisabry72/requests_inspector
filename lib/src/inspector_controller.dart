@@ -1,30 +1,46 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:shake/shake.dart';
+import 'package:requests_inspector/src/shake.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../requests_inspector.dart';
 import 'curl_command_generator.dart';
 import 'json_pretty_converter.dart';
 
+typedef StoppingRequestCallback = Future<RequestDetails?> Function(
+    RequestDetails requestDetails);
+
+typedef StoppingResponseCallback = Future Function(dynamic responseData);
+
 ///Singleton
 class InspectorController extends ChangeNotifier {
   factory InspectorController({
     bool enabled = false,
     ShowInspectorOn showInspectorOn = ShowInspectorOn.Shaking,
+    StoppingRequestCallback? onStoppingRequest,
+    StoppingResponseCallback? onStoppingResponse,
   }) =>
       _singleton ??= InspectorController._internal(
-        enabled,
-        showInspectorOn,
+        enabled: enabled,
+        showInspectorOn: showInspectorOn,
+        onStoppingRequest: onStoppingRequest,
+        onStoppingResponse: onStoppingResponse,
       );
 
-  InspectorController._internal(
-    bool enabled,
-    ShowInspectorOn showInspectorOn,
-  )   : _enabled = enabled,
-        _showInspectorOn = showInspectorOn {
+  InspectorController._internal({
+    required bool enabled,
+    required ShowInspectorOn showInspectorOn,
+    StoppingRequestCallback? onStoppingRequest,
+    StoppingResponseCallback? onStoppingResponse,
+  })  : _enabled = enabled,
+        _showInspectorOn = showInspectorOn,
+        _onStoppingRequest = onStoppingRequest,
+        _onStoppingResponse = onStoppingResponse {
     if (_enabled && _allowShaking)
-      _shakeDetector = ShakeDetector.autoStart(onPhoneShake: showInspector);
+      _shakeDetector = ShakeDetector.autoStart(
+        onPhoneShake: showInspector,
+        minimumShakeCount: 3,
+      );
   }
 
   static InspectorController? _singleton;
@@ -32,6 +48,8 @@ class InspectorController extends ChangeNotifier {
   late final bool _enabled;
   late final ShowInspectorOn _showInspectorOn;
   late final ShakeDetector _shakeDetector;
+  StoppingRequestCallback? _onStoppingRequest;
+  StoppingResponseCallback? _onStoppingResponse;
 
   final _dio = Dio(BaseOptions(validateStatus: (_) => true));
   final pageController = PageController(
@@ -42,11 +60,15 @@ class InspectorController extends ChangeNotifier {
   );
 
   int _selectedTab = 0;
+  bool _requestStopperEnabled = false;
+  bool _responseStopperEnabled = false;
 
   final _requestsList = <RequestDetails>[];
   RequestDetails? _selectedRequest;
 
   int get selectedTab => _selectedTab;
+  bool get requestStopperEnabled => _requestStopperEnabled;
+  bool get responseStopperEnabled => _responseStopperEnabled;
   List<RequestDetails> get requestsList => _requestsList;
   RequestDetails? get selectedRequest => _selectedRequest;
   bool get _allowShaking => [
@@ -57,6 +79,18 @@ class InspectorController extends ChangeNotifier {
   set selectedTab(int value) {
     if (_selectedTab == value) return;
     _selectedTab = value;
+    notifyListeners();
+  }
+
+  set requestStopperEnabled(bool value) {
+    if (_requestStopperEnabled == value) return;
+    _requestStopperEnabled = value;
+    notifyListeners();
+  }
+
+  set responseStopperEnabled(bool value) {
+    if (_responseStopperEnabled == value) return;
+    _responseStopperEnabled = value;
     notifyListeners();
   }
 
@@ -87,6 +121,7 @@ class InspectorController extends ChangeNotifier {
     if (_selectedRequest == null) return;
 
     var currentRequest = _selectedRequest!;
+    final sentTime = DateTime.now();
     final response = await _dio.request(
       currentRequest.url,
       queryParameters: currentRequest.queryParameters,
@@ -101,7 +136,8 @@ class InspectorController extends ChangeNotifier {
     _selectedRequest = currentRequest.copyWith(
       responseBody: response.data,
       statusCode: response.statusCode,
-      sentTime: DateTime.now(),
+      sentTime: sentTime,
+      receivedTime: DateTime.now(),
     );
 
     notifyListeners();
@@ -125,6 +161,7 @@ class InspectorController extends ChangeNotifier {
   @override
   void dispose() {
     if (_allowShaking) _shakeDetector.stopListening();
+    _singleton = null;
     super.dispose();
   }
 
@@ -139,5 +176,21 @@ class InspectorController extends ChangeNotifier {
     ];
 
     return listOfContent.join();
+  }
+
+  Future<RequestDetails?> editRequest(RequestDetails requestDetails) {
+    if (!_enabled || _onStoppingRequest == null) return Future.value(null);
+    return _onStoppingRequest!(requestDetails);
+  }
+
+  Future editResponse(responseData) {
+    if (!_enabled || _onStoppingResponse == null) return Future.value(null);
+
+    if (!['Map', 'String', 'List'].any((e) => responseData.runtimeType
+        .toString()
+        .replaceFirst('_', '')
+        .startsWith(e))) return Future.value(null);
+
+    return _onStoppingResponse!(responseData);
   }
 }

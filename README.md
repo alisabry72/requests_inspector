@@ -1,18 +1,45 @@
+[![Stand With Palestine](https://raw.githubusercontent.com/TheBSD/StandWithPalestine/main/banner-no-action.svg)](https://thebsd.github.io/StandWithPalestine)
+
+<div align="center" bgcolor="white">
+<img src="https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/logo_with_text_right.png" height= "350">
+</div>
+
 # requests_inspector 🕵
 
-A Flutter package for **logging** API requests (**RESTful API** & **GraphQL**) requests and accessing it by **Shaking** your phone to get the `RequestsInspector` widget on your screen.
+[![pub package](https://img.shields.io/pub/v/requests_inspector.svg)](https://pub.dev/packages/requests_inspector)
+
+A Flutter package for **logging** API requests (**Http Requests** & **GraphQL**) requests.
+
+### Main Features:
+
+1. Log your `Http request`, `GraphQL` and `WebSockets`.
+2. Intercept your requests and responses for testing.
+3. Share request details as json or as `cURL` to re-run it again (ex. `Postman`).
+
+And more and more
+
+##### To get the `RequestsInspector` widget on your screen:
+
+1. 📱💃 : **Shake** your phone.
+
+2. 📱👈 : **Long-Press** on any free space on the screen.
+
+<img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/mobile_list.jpg" width ="280" /> <img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/mobile_request.jpg" width ="280" />
 
 Also you can share the request details as (**Log** or **cURL** command) with your team to help them debug the API requests.
 
-**Note:**
-You can use `cURL` command to send the request again from your terminal or [Postman](https://www.postman.com/) 💪💪
+**From Inspector to Postman 🧡 🎉️**
+Now you can extract `cURL` command from the **inspector** to send the request again from your terminal or [Postman](https://www.postman.com/) 💪💪
 
-### First, add it at the top of your `MaterialApp` with `enabled: true`.
+<img src="https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/curl_share_request.gif" width="600"/>
+
+## `Setup`
+
+First, add it at the top of your `MaterialApp` with `enabled: true`.
 
 ```dart
 void main() {
   runApp(const RequestsInspector(
-    enabled: true,
     child: MyApp(),
   ));
 }
@@ -20,9 +47,16 @@ void main() {
 
 ### 1. RESTful API:
 
-**Note:** Don't forget to `enable` it!
+#### Using `Dio`, pass by `RequestsInspectorInterceptor()` to `Dio.interceptors` and we are good to go 🎉️🎉️.
 
-### Then, on your API request add a new `RequestDetails` using `RequestInspectorController` filled with the API data.
+```dart
+final dio = Dio()..interceptors.add(RequestsInspectorInterceptor());
+
+```
+
+### If you don't use `Dio` then don't worry
+
+In your API request just add a new `RequestDetails` using `RequestInspectorController` filled with the API data.
 
 ```dart
 InspectorController().addNewRequest(
@@ -35,13 +69,6 @@ InspectorController().addNewRequest(
         responseBody: responseData,
         ),
     );
-```
-
-### OR, if you are using `Dio`, then you can just pass `RequestsInspectorInterceptor()` to `Dio.interceptors` and we are good to go 🎉️🎉️.
-
-```dart
-final dio = Dio()..interceptors.add(RequestsInspectorInterceptor());
-
 ```
 
 ### Real Restful example
@@ -92,7 +119,7 @@ Future<List<Post>> fetchPosts() async {
 
 ### Finlay, `Shake` your phone to get the `Inspector`
 
-<img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/screenshots/mobile_list.jpg" width ="280" /> <img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/screenshots/mobile_request.jpg" width ="280" />
+<img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/mobile_list.jpg" width ="280" /> <img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/mobile_request.jpg" width ="280" />
 
 ### 2. GraphQl:
 
@@ -133,29 +160,36 @@ you jus need to wrap your normal `HttpLink` with our `GraphQLInspectorLink` and 
 
 ```
 
-### 3. GraphQl(Hassura):
+### Stopper (Requests & Responses)
 
-You can use [hasura_connect]('https://pub.dev/packages/hasura_connect') library to use the graph ql requests, then you can just pass `HasuraInspectorInterceptor()` to `HassuraConnect.interceptors` and we are good to go 🎉️🎉️.
+`requests_inspector` **(Stopper)** enables your to stop and edit requests (before sending it to server) and responses (before receiving it inside the app).
+
+- First, you need to add navigatorKey to your `MaterialApp` then pass it to `RequestsInspector` to show Stopper dialogs.
 
 ```dart
- Future<List<Post>> fetchPostsGraphQlUsingHasuraInterceptor() async {
-  final response = await HasuraConnect(
-    'https://graphqlzero.almansi.me/api',
-    interceptors: [HasuraInspectorInterceptor()],
-  ).query('''query {
-    post(id: 1) {
-      id
-      title
-      body
-    }
-    }''');
-  print(response);
-  var post = Post.fromMap(response['data']['post']);
-  print(post.toMap());
+final navigatorKey = GlobalKey<NavigatorState>();
 
-  return [post];
-}
+void main() => runApp(
+  RequestsInspector(
+    // Add your `navigatorKey` to enable `Stopper` feature
+    navigatorKey: navigatorKey,
+    child: const MyApp(),
+  ),
+);
+
+...
+
+@override
+Widget build(BuildContext context) {
+  return MaterialApp(
+    navigatorKey: navigatorKey, // <== Here!
+    ...
+
 ```
+
+- Second, just enable it from Inspector and it will stop all your requests and responses.
+
+<img src="https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/stopper_feature.gif" width="280"/>
 
 ### For Web, Windows, MacOS and Linux
 
@@ -185,18 +219,20 @@ void main() {
 }
 ```
 
-## Some screenshots
+## Some images
 
-<img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/screenshots/web_list.png" width ="280" /> <img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/screenshots/web_request.png" width ="280" />
-<img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/screenshots/mac_list.png" width ="280" /> <img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/screenshots/mac_request.png" width ="280" />
-<img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/screenshots/linux_list.png" width ="280" /> <img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/screenshots/linux_request.png" width ="280" />
+<img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/web_list.png" width ="280" /> <img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/web_request.png" width ="280" />
+<img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/mac_list.png" width ="280" /> <img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/mac_request.png" width ="280" />
+<img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/linux_list.png" width ="280" /> <img src = "https://raw.githubusercontent.com/Abdelazeem777/requests_inspector/main/images/linux_request.png" width ="280" />
 
-## Future plans
+## Future plans:
 
 - [x] Add support for `GraphQL`.
-- [ ] Enhance the `GraphQL` request and response displaying structure.
-- [ ] Improve the request tab UI and add expand/collapse for each data block.
+- [x] Enhance the `GraphQL` request and response displaying structure.
+- [x] Improve the request tab UI and add expand/collapse for each data block.
+- [ ] Support Dark/Light Modes.
 - [ ] Add search inside the request details page.
+- [ ] Add Http Interceptor.
 
 ## 📃 License
 

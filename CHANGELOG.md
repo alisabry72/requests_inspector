@@ -1,3 +1,83 @@
+## 4.2.1
+
+- Fix `connectivity_plus` version dependency issue with `graphql` thanks to [MohamedGawdat](https://github.com/MohamedGawdat)
+
+## 4.2.0
+
+- Support Flutter v3.27.0 thanks to [MAlazhariy](https://github.com/MAlazhariy)
+
+## 4.1.2
+
+- Dispose singleton when dispose notifier thanks to [AnthonyXcode](https://github.com/AnthonyXcode).
+
+## 4.1.1
+
+- Downgrade `connectivity_plus` to the most suitable version.
+
+## 4.1.0
+
+- Start depending on `sensor_plus` instead of using `shake` package to handle the shaking event.
+- Start using flutter v3.19.6.
+- Increase the version to `4.1.0` because the `4.0.4` version is a sign of trouble 😅.
+
+## 4.0.4
+
+- Add a stunning and captivating new logo, thanks to the incredibly talented [Yumna Hossam](https://www.behance.net/yumnahossam). 🎉️🎉️
+- Update documentation (`README.md`) file.
+
+## 4.0.3
+
+- Update documentation (`README.md`) file.
+
+## 4.0.2
+
+- Revert the latest solution provided on v4.0.1 because of related issue with `flutter_zoom_drawer` package.
+
+## 4.0.1
+
+- Update README.md file.
+- Reverse between the `child` widget and the `Inspector` widget on the internal PageView to start with `Inspector` first.
+
+## 4.0.0
+
+- Completely new UI theme for the inspector. 🎉️🎉️
+- Enhance user experience and texts readability. 😃
+
+## 3.5.0
+
+- Add the ability to intercept the response before sending it to the client and modify it. 🥳
+- Renamed the Request intercept and Response intercept to `Stopper` so now both come under `Request Stopper` and `Response Stopper` respectively .
+
+## 3.4.1
+
+- Update showInspectorOn enum value from Shaking to Both.
+
+## 3.4.0
+
+- Add the ability to intercept the request before sending it to the server and modify it.
+
+## 3.3.2
+
+- Add request Duration to the request details for HTTP and GraphQL.
+
+## 3.3.1
+
+- Add support for Flutter v3.16.\*, thanks to [the-best-is-best](https://github.com/the-best-is-best).
+- Upgrade `gql` package to v1.0.0+1.
+
+## 3.3.0
+
+- Increase the shaking count to 3 times to open the inspector.
+- Remove HasuraGraphQL support for now because of the packages conflicts.
+
+## 3.2.1
+
+- Fix `hideInspectorBanner: true` no longer crashes the app, thanks to [vlytvyne](https://github.com/vlytvyne).
+
+- Fix `ShowInspectorOn.LongPress` not working if `ShowInspectorOn.Shaking` is set, thanks to [vlytvyne](https://github.com/vlytvyne).
+
+- Update README.md file.
+
 ## 3.2.0
 
 - Now you can share your request as a `cURL` command. 🥳
