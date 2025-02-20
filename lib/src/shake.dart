@@ -39,7 +39,7 @@ class ShakeDetector {
 
   /// Starts listening to accelerometer events
   void startListening() {
-    _streamSubscription = accelerometerEventStream().listen(
+    _streamSubscription = accelerometerEvents.listen(
       (AccelerometerEvent event) {
         double x = event.x;
         double y = event.y;
